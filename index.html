@@ -108,7 +108,7 @@
             IVR Interactive Voice Menu
           </div>
           <h2 id="customerCallStatus" class="text-2xl font-bold text-slate-900">
-            Playing Language Selection...
+            Connecting...
           </h2>
           <div id="customerCallTimer" class="text-sm font-mono text-slate-500 mt-1 font-semibold">
             00:00
@@ -118,7 +118,7 @@
         <!-- AUTHENTIC TELEPHONE NUMERIC KEYPAD -->
         <div id="ivrKeypadPanel" class="w-full bg-slate-50 border border-slate-200 p-5 rounded-3xl space-y-4 max-w-sm mx-auto shadow-inner">
           <div id="ivrPromptText" class="text-xs font-bold text-slate-700 uppercase tracking-wider">
-            Press 1 for Welsh, 2 for English
+            Connecting...
           </div>
 
           <div class="grid grid-cols-3 gap-3">
@@ -167,7 +167,7 @@
         <!-- HOLD BANNER -->
         <div id="customerHoldNotice" class="hidden text-xs bg-amber-50 border border-amber-300 text-amber-800 px-4 py-2.5 rounded-xl flex items-center justify-center space-x-2 w-full font-medium">
           <i class="fa-solid fa-pause text-amber-600 animate-pulse"></i>
-          <span>Call parked by staff desk. Playing hold music...</span>
+          <span>Please hold, connecting your call...</span>
         </div>
 
         <canvas id="customerVisualizer" class="w-full h-12 bg-slate-100 rounded-xl border border-slate-200"></canvas>
@@ -343,8 +343,9 @@
     let customerPeer = null;
     let currentCall = null;
     let localStream = null;
-    let currentIvrStep = 'intro'; // 'intro', 'english', 'welsh'
+    let currentIvrStep = 'ringing'; // 'ringing', 'intro', 'english', 'welsh', 'holding'
     let selectedDepartment = 'General Support';
+    let ringTimer = null;
 
     let callTimerInterval = null;
     let callSeconds = 0;
@@ -396,26 +397,26 @@
       }
     }
 
-    // MULTI-STAGE IVR AUDIO HANDLER
-    function playIvrMedia(mediaSrc, onEndedCallback) {
+    function stopIvrMedia() {
+      const player = document.getElementById('ivrPlayer');
+      player.pause();
+      player.currentTime = 0;
+    }
+
+    function playIvrMedia(mediaSrc) {
+      stopIvrMedia();
       const player = document.getElementById('ivrPlayer');
       player.src = mediaSrc;
       player.play().catch(e => console.log("Playback error:", e));
-      player.onended = () => {
-        if (onEndedCallback) onEndedCallback();
-      };
     }
 
     async function initiateCustomerCall() {
       document.getElementById('customerIdleState').classList.add('hidden');
       document.getElementById('customerActiveState').classList.remove('hidden');
       
-      currentIvrStep = 'intro';
-      document.getElementById('customerCallStatus').innerText = "Language Selection...";
-      document.getElementById('ivrPromptText').innerText = "Press 1 for Welsh, 2 for English";
-
-      // Play intro video/audio: emeivrintro.mp4
-      playIvrMedia('emeivrintro.mp4');
+      currentIvrStep = 'ringing';
+      document.getElementById('customerCallStatus').innerText = "Ringing...";
+      document.getElementById('ivrPromptText').innerText = "Connecting call...";
 
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -424,40 +425,58 @@
       } catch (err) {
         alert("Microphone permission required for web call.");
         cleanupCustomerCall();
+        return;
       }
+
+      // Ring for 2 seconds before playing emeivrintro.mp4
+      ringTimer = setTimeout(() => {
+        currentIvrStep = 'intro';
+        document.getElementById('customerCallStatus').innerText = "Language Selection";
+        document.getElementById('ivrPromptText').innerText = "Press 1 for Welsh, 2 for English";
+        playIvrMedia('emeivrintro.mp4');
+      }, 2000);
     }
 
     function handleKeypadInput(key) {
       if (currentIvrStep === 'intro') {
         if (key === '1') { // Welsh
+          stopIvrMedia();
           currentIvrStep = 'welsh';
-          document.getElementById('customerCallStatus').innerText = "Dewis Devis...";
+          document.getElementById('customerCallStatus').innerText = "Dewis Devis";
           document.getElementById('ivrPromptText').innerText = "Pwyswch 1 am Gefnogaeth Gyffredinol neu 2 am Gefnogaeth Reoli";
           playIvrMedia('emeivrwelsh.mp4');
         } else if (key === '2') { // English
+          stopIvrMedia();
           currentIvrStep = 'english';
-          document.getElementById('customerCallStatus').innerText = "Department Selection...";
+          document.getElementById('customerCallStatus').innerText = "Department Selection";
           document.getElementById('ivrPromptText').innerText = "Press 1 for General Support or 2 for Management Support";
           playIvrMedia('emeivreng.mp4');
         }
       } else if (currentIvrStep === 'english') {
-        if (key === '1') connectToStaff('General Support');
-        else if (key === '2') connectToStaff('Management Support');
+        if (key === '1') {
+          stopIvrMedia();
+          connectToStaff('General Support');
+        } else if (key === '2') {
+          stopIvrMedia();
+          connectToStaff('Management Support');
+        }
       } else if (currentIvrStep === 'welsh') {
-        if (key === '1') connectToStaff('Cefnogaeth Gyffredinol');
-        else if (key === '2') connectToStaff('Cefnogaeth Reoli');
+        if (key === '1') {
+          stopIvrMedia();
+          connectToStaff('Cefnogaeth Gyffredinol');
+        } else if (key === '2') {
+          stopIvrMedia();
+          connectToStaff('Cefnogaeth Reoli');
+        }
       }
     }
 
     function connectToStaff(dept) {
+      currentIvrStep = 'holding';
       selectedDepartment = dept;
       document.getElementById('customerCallDept').innerText = `Department: ${selectedDepartment}`;
-      document.getElementById('customerCallStatus').innerText = "Ringing EME Staff...";
+      document.getElementById('customerCallStatus').innerText = "Please Hold";
       document.getElementById('ivrKeypadPanel').classList.add('hidden');
-
-      // Stop IVR video/audio
-      const player = document.getElementById('ivrPlayer');
-      player.pause();
 
       startHoldMusic();
 
@@ -517,11 +536,14 @@
     }
 
     function endCustomerCall() {
+      if (ringTimer) clearTimeout(ringTimer);
       if (currentCall) currentCall.close();
       cleanupCustomerCall();
     }
 
     function cleanupCustomerCall() {
+      if (ringTimer) clearTimeout(ringTimer);
+      stopIvrMedia();
       stopHoldMusic();
       stopTimer();
       localStorage.removeItem('eme_active_call');
