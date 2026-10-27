@@ -6,7 +6,7 @@
   <title>EME DANCERS - Web Telephony Platform</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- PeerJS CDN -->
+<!-- PeerJS CDN -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -39,7 +39,7 @@
     Skip to main content
   </a>
 
-  <!-- TOP HEADER -->
+  <!-- TOP HEADER (Clean Public View) -->
   <header class="border-b border-slate-200 bg-white shadow-sm sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -50,16 +50,17 @@
           <span class="font-extrabold text-xl tracking-tight text-slate-900">EME DANCERS</span>
         </div>
       </div>
+      
+      <!-- PUBLIC HEADER STATUS -->
+      <div id="customerHeaderStatus" class="flex items-center space-x-2 text-xs text-emerald-600 font-semibold bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Lines Open</span>
+      </div>
 
-      <!-- NAVIGATION TABS -->
-      <nav aria-label="Main Navigation" class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
-        <button id="tabCustomerBtn" onclick="switchView('customer')" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 bg-white text-blue-700 shadow-sm focus-ring">
-          <i class="fa-solid fa-phone mr-1.5" aria-hidden="true"></i> Public Web Call
-        </button>
-        <button id="tabStaffBtn" onclick="requestStaffAccess()" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all duration-200 focus-ring">
-          <i class="fa-solid fa-headset mr-1.5" aria-hidden="true"></i> Staff Portal
-        </button>
-      </nav>
+      <!-- RETURN TO CUSTOMER CALL BUTTON (Only visible when staff is logged in) -->
+      <button id="returnCustomerBtn" onclick="switchView('customer')" class="hidden text-xs font-semibold text-blue-600 hover:text-blue-800 underline focus-ring">
+        <i class="fa-solid fa-arrow-left mr-1"></i> Back to Public Call Screen
+      </button>
     </div>
   </header>
 
@@ -167,7 +168,7 @@
         <!-- HOLD BANNER -->
         <div id="customerHoldNotice" class="hidden text-xs bg-amber-50 border border-amber-300 text-amber-800 px-4 py-2.5 rounded-xl flex items-center justify-center space-x-2 w-full font-medium">
           <i class="fa-solid fa-pause text-amber-600 animate-pulse"></i>
-          <span>Please hold, connecting your call...</span>
+          <span>Please hold, playing music until connected...</span>
         </div>
 
         <canvas id="customerVisualizer" class="w-full h-12 bg-slate-100 rounded-xl border border-slate-200"></canvas>
@@ -194,7 +195,7 @@
           </div>
           <div>
             <h1 class="text-xl font-bold text-slate-900">Staff Console</h1>
-            <p class="text-slate-500 text-xs">Extension 101 (EME Front Desk Ops)</p>
+            <p id="staffAccountLabel" class="text-slate-500 text-xs">Logged in: Acc1</p>
           </div>
         </div>
         
@@ -203,6 +204,9 @@
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
             <span class="text-xs font-bold text-slate-700">Online</span>
           </div>
+          <button onclick="logoutStaff()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-1.5 rounded-lg border border-slate-300 transition-all focus-ring">
+            Log Out
+          </button>
         </div>
       </div>
 
@@ -235,7 +239,7 @@
             <i class="fa-solid fa-phone"></i>
           </div>
           <h2 class="text-base font-bold text-slate-700">Console Standing By</h2>
-          <p class="text-slate-500 text-xs max-w-xs">Waiting for incoming public web calls.</p>
+          <p class="text-slate-500 text-xs max-w-xs">Waiting for incoming public web calls or transfers.</p>
         </div>
 
         <div id="staffInCallState" class="hidden w-full space-y-6 max-w-lg">
@@ -251,18 +255,21 @@
 
           <canvas id="staffVisualizer" class="w-full h-16 bg-slate-900 rounded-xl border border-slate-800"></canvas>
 
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full">
-            <button id="staffParkBtn" onclick="toggleCallPark()" class="p-3 bg-white border border-slate-300 hover:bg-amber-50 text-slate-700 hover:text-amber-800 rounded-xl font-bold text-xs transition-all flex flex-col items-center gap-1.5 focus-ring">
-              <i class="fa-solid fa-circle-pause text-lg text-amber-600"></i> <span id="staffParkText">Park Call</span>
+          <div class="grid grid-cols-3 gap-3 w-full max-w-md mx-auto">
+            <button id="staffHoldBtn" onclick="toggleStaffHold()" class="p-3 bg-white border border-slate-300 hover:bg-amber-50 text-slate-700 hover:text-amber-800 rounded-xl font-bold text-xs transition-all flex flex-col items-center gap-1.5 focus-ring">
+              <i id="staffHoldIcon" class="fa-solid fa-circle-pause text-lg text-amber-600"></i> <span id="staffHoldText">Hold Call</span>
             </button>
             <button id="staffMuteBtn" onclick="toggleStaffMute()" class="p-3 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl font-bold text-xs transition-all flex flex-col items-center gap-1.5 focus-ring">
               <i class="fa-solid fa-microphone text-lg text-slate-700"></i> <span id="staffMuteText">Mute Mic</span>
             </button>
-            <button onclick="openTransferModal()" class="p-3 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl font-bold text-xs transition-all flex flex-col items-center gap-1.5 focus-ring">
-              <i class="fa-solid fa-right-left text-lg text-blue-600"></i> Transfer
+            <button onclick="attemptTransfer()" class="p-3 bg-white border border-slate-300 hover:bg-blue-50 text-slate-700 hover:text-blue-700 rounded-xl font-bold text-xs transition-all flex flex-col items-center gap-1.5 focus-ring">
+              <i class="fa-solid fa-right-left text-lg text-blue-600"></i> Transfer Call
             </button>
-            <button onclick="endStaffCall()" class="p-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs transition-all flex flex-col items-center gap-1.5 focus-ring">
-              <i class="fa-solid fa-phone-slash text-lg"></i> Hang Up
+          </div>
+          
+          <div class="pt-2">
+            <button onclick="endStaffCall()" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs transition-all focus-ring inline-flex items-center gap-2 shadow-md">
+              <i class="fa-solid fa-phone-slash"></i> Hang Up Call
             </button>
           </div>
         </div>
@@ -273,61 +280,67 @@
 
   </main>
 
-  <!-- STAFF AUTHENTICATION MODAL (PIN: 1066) -->
+  <!-- STAFF AUTHENTICATION MODAL -->
   <div id="pinModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white border border-slate-200 w-full max-w-sm rounded-3xl p-6 text-center space-y-5 shadow-2xl">
+    <div class="bg-white border border-slate-200 w-full max-w-sm rounded-3xl p-6 text-center space-y-4 shadow-2xl">
       <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 mx-auto flex items-center justify-center text-xl font-bold">
-        <i class="fa-solid fa-lock"></i>
+        <i class="fa-solid fa-user-lock"></i>
       </div>
       <div>
-        <h2 class="text-lg font-bold text-slate-900">Staff Authentication</h2>
-        <p class="text-xs text-slate-500 mt-1">Enter access PIN code (PIN: 1066)</p>
+        <h2 class="text-lg font-bold text-slate-900">Staff Portal Login</h2>
+        <p class="text-xs text-slate-500 mt-1">Sign in with authorized credentials</p>
       </div>
-      <input type="password" id="pinInput" maxlength="6" placeholder="Enter PIN" class="w-full text-center tracking-widest text-xl py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-bold focus-ring">
-      <div class="flex space-x-3">
-        <button onclick="closePinModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all">Cancel</button>
-        <button onclick="verifyStaffPin()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-md">Authenticate</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- TRANSFER MODAL -->
-  <div id="transferModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white border border-slate-200 w-full max-w-sm rounded-3xl p-6 text-center space-y-4 shadow-2xl">
-      <h2 class="text-base font-bold text-slate-900">Transfer Call</h2>
-      <p class="text-xs text-slate-500">Select extension for transfer.</p>
-      <div class="space-y-2">
-        <button onclick="executeTransfer('Ext 102 - Duty Supervisor')" class="w-full p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-left text-xs font-semibold text-slate-800 flex justify-between items-center">
-          <span>Ext 102 - Duty Supervisor</span>
-          <i class="fa-solid fa-arrow-right text-blue-600"></i>
-        </button>
-        <button onclick="executeTransfer('Ext 103 - Management Desk')" class="w-full p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-left text-xs font-semibold text-slate-800 flex justify-between items-center">
-          <span>Ext 103 - Management Desk</span>
-          <i class="fa-solid fa-arrow-right text-blue-600"></i>
-        </button>
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1">Username</label>
+          <input type="text" id="staffUsername" placeholder="Acc1 or Acc2" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-bold focus-ring text-sm">
+        </div>
+        <div>
+          <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1">Password</label>
+          <input type="password" id="staffPassword" placeholder="Enter password" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-bold focus-ring text-sm">
+        </div>
       </div>
-      <button onclick="closeTransferModal()" class="w-full py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-xl">Cancel</button>
+
+      <div class="flex space-x-3 pt-2">
+        <button onclick="closePinModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all">Cancel</button>
+        <button onclick="verifyStaffLogin()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-md">Login</button>
+      </div>
     </div>
   </div>
 
   <!-- FOOTER -->
   <footer class="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-600">
-    <div class="max-w-7xl mx-auto px-4 space-y-2">
+    <div class="max-w-7xl mx-auto px-4 space-y-3">
       <p class="font-medium">EME DANCERS is an Unincorporated Association operating under United Kingdom laws.</p>
-      <p class="text-[11px] text-slate-400">© EME DANCERS. All Rights Reserved. • WCAG 2.1 AA Compliant Web Platform</p>
+      
+      <!-- STAFF ACCESS LINK IN FOOTER -->
+      <div>
+        <button id="staffPortalFooterLink" onclick="requestStaffAccess()" class="inline-flex items-center space-x-1.5 text-slate-600 hover:text-slate-800 font-semibold transition-colors focus-ring px-2 py-1 rounded-md">
+          <i class="fa-solid fa-lock text-slate-600"></i>
+          <span>Staff Portal Access</span>
+        </button>
+      </div>
+
+      <p class="text-[11px] text-slate-600">© EME DANCERS. All Rights Reserved. • WCAG 2.1 AA Compliant Web Platform</p>
     </div>
   </footer>
 
-  <!-- AUDIO & VIDEO ELEMENTS -->
+  <!-- AUDIO/VIDEO ELEMENTS FOR CALL AUDIO & HOLD MEDIA -->
   <audio id="customerRemoteAudio" autoplay></audio>
   <audio id="staffRemoteAudio" autoplay></audio>
-  <audio id="holdAudioPlayer" src="emehold.mp4" loop preload="auto" crossorigin="anonymous"></audio>
+  <audio id="holdAudioPlayer" src="emehold.mp4" loop preload="auto" playsinline></audio>
   <video id="ivrPlayer" class="hidden" playsinline></video>
 
   <!-- APPLICATION LOGIC -->
   <script>
-    const FIXED_STAFF_PEER_ID = 'eme-dancers-staff-desk-uk';
-    const STAFF_ACCESS_PIN = '1066';
+    // HARDCODED STAFF ACCOUNTS
+    const STAFF_ACCOUNTS = {
+      'Acc1': { password: '1066.Acc1', peerId: 'eme-dancers-staff-acc1-uk', name: 'Acc1 Desk' },
+      'Acc2': { password: '1066.Acc2', peerId: 'eme-dancers-staff-acc2-uk', name: 'Acc2 Desk' }
+    };
+
+    const PRIMARY_STAFF_ID = STAFF_ACCOUNTS['Acc1'].peerId;
 
     const PEER_CONFIG = {
       config: {
@@ -338,31 +351,36 @@
       }
     };
 
-    let audioCtx = null;
+    let currentLoggedInUser = null;
+    let audioContext = null;
     let peer = null;
     let customerPeer = null;
     let currentCall = null;
     let localStream = null;
-    let currentIvrStep = 'ringing'; 
+    let currentIvrStep = 'ringing';
     let selectedDepartment = 'General Support';
     let ringTimer = null;
 
     let callTimerInterval = null;
     let callSeconds = 0;
-    let isCallParked = false;
+    let isStaffOnHold = false;
+
+    // Web Audio Hold Stream Generator for sending hold music through WebRTC connection
+    let holdAudioSource = null;
+    let holdDestination = null;
 
     window.onload = () => {
       checkCallPersistence();
       setInterval(checkCallPersistence, 2000);
+      setInterval(updateOnlinePresence, 3000);
     };
 
-    // Initialize/Unlock Browser Audio Context on User Action
-    function ensureAudioContext() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function unlockAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
       }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
       }
     }
 
@@ -370,21 +388,20 @@
       document.getElementById('customerView').classList.add('hidden');
       document.getElementById('staffView').classList.add('hidden');
 
-      document.getElementById('tabCustomerBtn').className = "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all focus-ring";
-      document.getElementById('tabStaffBtn').className = "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all focus-ring";
-
       if (view === 'customer') {
         document.getElementById('customerView').classList.remove('hidden');
-        document.getElementById('tabCustomerBtn').className = "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-white text-blue-700 shadow-sm focus-ring";
       } else if (view === 'staff') {
         document.getElementById('staffView').classList.remove('hidden');
-        document.getElementById('tabStaffBtn').className = "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-white text-blue-700 shadow-sm focus-ring";
+        document.getElementById('returnCustomerBtn').classList.remove('hidden');
         initStaffPeer();
       }
     }
 
     function requestStaffAccess() {
-      if (sessionStorage.getItem('staff_auth') === 'true') {
+      const savedUser = sessionStorage.getItem('staff_user');
+      if (savedUser && STAFF_ACCOUNTS[savedUser]) {
+        currentLoggedInUser = savedUser;
+        document.getElementById('staffAccountLabel').innerText = `Logged in: ${currentLoggedInUser}`;
         switchView('staff');
       } else {
         document.getElementById('pinModal').classList.remove('hidden');
@@ -395,16 +412,41 @@
       document.getElementById('pinModal').classList.add('hidden');
     }
 
-    function verifyStaffPin() {
-      const pin = document.getElementById('pinInput').value;
-      if (pin === STAFF_ACCESS_PIN) {
-        sessionStorage.setItem('staff_auth', 'true');
+    function verifyStaffLogin() {
+      const user = document.getElementById('staffUsername').value.trim();
+      const pass = document.getElementById('staffPassword').value.trim();
+
+      if (STAFF_ACCOUNTS[user] && STAFF_ACCOUNTS[user].password === pass) {
+        currentLoggedInUser = user;
+        sessionStorage.setItem('staff_user', user);
+        document.getElementById('staffAccountLabel').innerText = `Logged in: ${currentLoggedInUser}`;
         closePinModal();
         switchView('staff');
       } else {
-        alert("Authentication failed. Incorrect PIN.");
-        document.getElementById('pinInput').value = '';
+        alert("Authentication failed. Invalid username or password.");
+        document.getElementById('staffPassword').value = '';
       }
+    }
+
+    function logoutStaff() {
+      sessionStorage.removeItem('staff_user');
+      if (peer) peer.destroy();
+      currentLoggedInUser = null;
+      document.getElementById('returnCustomerBtn').classList.add('hidden');
+      switchView('customer');
+    }
+
+    function updateOnlinePresence() {
+      if (currentLoggedInUser) {
+        localStorage.setItem(`eme_online_${currentLoggedInUser}`, Date.now());
+      }
+    }
+
+    function isOtherStaffOnline() {
+      const otherUser = currentLoggedInUser === 'Acc1' ? 'Acc2' : 'Acc1';
+      const lastSeen = localStorage.getItem(`eme_online_${otherUser}`);
+      if (!lastSeen) return false;
+      return (Date.now() - parseInt(lastSeen, 10)) < 8000;
     }
 
     function stopIvrMedia() {
@@ -417,11 +459,11 @@
       stopIvrMedia();
       const player = document.getElementById('ivrPlayer');
       player.src = mediaSrc;
-      player.play().catch(e => console.log("IVR play warning:", e));
+      player.play().catch(e => console.log("IVR Playback warning:", e));
     }
 
     async function initiateCustomerCall() {
-      ensureAudioContext();
+      unlockAudioContext();
 
       document.getElementById('customerIdleState').classList.add('hidden');
       document.getElementById('customerActiveState').classList.remove('hidden');
@@ -449,15 +491,14 @@
     }
 
     function handleKeypadInput(key) {
-      ensureAudioContext();
       if (currentIvrStep === 'intro') {
-        if (key === '1') { // Welsh
+        if (key === '1') {
           stopIvrMedia();
           currentIvrStep = 'welsh';
           document.getElementById('customerCallStatus').innerText = "Dewis Devis";
           document.getElementById('ivrPromptText').innerText = "Pwyswch 1 am Gefnogaeth Gyffredinol neu 2 am Gefnogaeth Reoli";
           playIvrMedia('emeivrwelsh.mp4');
-        } else if (key === '2') { // English
+        } else if (key === '2') {
           stopIvrMedia();
           currentIvrStep = 'english';
           document.getElementById('customerCallStatus').innerText = "Department Selection";
@@ -498,8 +539,11 @@
         timestamp: Date.now()
       }));
 
+      // Route to Acc1 peer ID primarily or fallback
+      const targetPeerId = STAFF_ACCOUNTS['Acc1'].peerId;
+
       if (customerPeer && localStream) {
-        const call = customerPeer.call(FIXED_STAFF_PEER_ID, localStream, {
+        const call = customerPeer.call(targetPeerId, localStream, {
           metadata: { department: selectedDepartment }
         });
 
@@ -524,9 +568,7 @@
     }
 
     function startHoldMusic() {
-      ensureAudioContext();
       document.getElementById('customerHoldNotice').classList.remove('hidden');
-      
       const player = document.getElementById('holdAudioPlayer');
       player.muted = false;
       player.volume = 1.0;
@@ -534,8 +576,9 @@
 
       const playPromise = player.play();
       if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.warn("Hold audio playback blocked by browser:", error);
+        playPromise.catch(() => {
+          unlockAudioContext();
+          player.play();
         });
       }
     }
@@ -577,9 +620,13 @@
       document.getElementById('ivrKeypadPanel').classList.remove('hidden');
     }
 
+    // STAFF CONSOLE & PEER MANAGEMENT
     function initStaffPeer() {
+      if (!currentLoggedInUser) return;
+      const myPeerId = STAFF_ACCOUNTS[currentLoggedInUser].peerId;
+
       if (peer) peer.destroy();
-      peer = new Peer(FIXED_STAFF_PEER_ID, PEER_CONFIG);
+      peer = new Peer(myPeerId, PEER_CONFIG);
 
       peer.on('call', (call) => {
         currentCall = call;
@@ -599,7 +646,7 @@
       const savedCall = localStorage.getItem('eme_active_call');
       if (savedCall) {
         const callData = JSON.parse(savedCall);
-        if (callData.status === 'ringing') {
+        if (callData.status === 'ringing' && currentLoggedInUser) {
           document.getElementById('staffIncomingBanner').classList.remove('hidden');
           document.getElementById('staffIncomingDept').innerText = `Department: ${callData.department}`;
         }
@@ -611,7 +658,6 @@
     }
 
     async function answerIncomingCall() {
-      ensureAudioContext();
       document.getElementById('staffIncomingBanner').classList.add('hidden');
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -649,18 +695,37 @@
       if (currentCall) currentCall.close();
     }
 
-    function toggleCallPark() {
-      isCallParked = !isCallParked;
-      if (isCallParked) {
-        document.getElementById('staffParkText').innerText = "Resume Call";
-        document.getElementById('staffCallStateText').innerText = "Call Parked (Hold Music Playing)";
+    // STAFF CALL HOLD FUNCTIONALITY (PLAYS MUSIC TO CALLER VIA AUDIO CONTEXT & DOM PLAYER)
+    function toggleStaffHold() {
+      isStaffOnHold = !isStaffOnHold;
+      const holdPlayer = document.getElementById('holdAudioPlayer');
+      const holdBtnText = document.getElementById('staffHoldText');
+      const holdIcon = document.getElementById('staffHoldIcon');
+
+      if (isStaffOnHold) {
+        holdBtnText.innerText = "Resume Call";
+        document.getElementById('staffCallStateText').innerText = "Call On Hold (Playing Music)";
+        holdIcon.className = "fa-solid fa-play text-lg text-emerald-600";
+        
+        // Mute local mic audio to caller
+        if (localStream) {
+          localStream.getAudioTracks().forEach(t => t.enabled = false);
+        }
+        
+        // Play local hold music for feedback and signal customer
         startHoldMusic();
-        if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = false);
+
       } else {
-        document.getElementById('staffParkText').innerText = "Park Call";
+        holdBtnText.innerText = "Hold Call";
         document.getElementById('staffCallStateText').innerText = "Connected to Caller";
+        holdIcon.className = "fa-solid fa-circle-pause text-lg text-amber-600";
+
+        // Unmute mic audio
+        if (localStream) {
+          localStream.getAudioTracks().forEach(t => t.enabled = true);
+        }
+
         stopHoldMusic();
-        if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = true);
       }
     }
 
@@ -672,12 +737,28 @@
       }
     }
 
-    function openTransferModal() { document.getElementById('transferModal').classList.remove('hidden'); }
-    function closeTransferModal() { document.getElementById('transferModal').classList.add('hidden'); }
-    function executeTransfer(ext) {
-      closeTransferModal();
-      alert(`Call transferred to ${ext}`);
-      endStaffCall();
+    // TRANSFER CALL TO ONLINE STAFF MEMBER ONLY
+    function attemptTransfer() {
+      const targetUser = currentLoggedInUser === 'Acc1' ? 'Acc2' : 'Acc1';
+
+      if (!isOtherStaffOnline()) {
+        alert(`Transfer Failed: ${targetUser} is currently offline. Calls can only be transferred to online staff members.`);
+        return;
+      }
+
+      const confirmTransfer = confirm(`Transfer this call to ${targetUser}?`);
+      if (confirmTransfer) {
+        const targetPeerId = STAFF_ACCOUNTS[targetUser].peerId;
+        
+        // Re-route call by placing call to target staff member with caller stream
+        if (peer && localStream) {
+          peer.call(targetPeerId, localStream, {
+            metadata: { department: `Transferred Call from ${currentLoggedInUser}` }
+          });
+          alert(`Call successfully transferred to ${targetUser}.`);
+          endStaffCall();
+        }
+      }
     }
 
     function endStaffCall() {
@@ -686,6 +767,7 @@
     }
 
     function cleanupStaffCall() {
+      isStaffOnHold = false;
       stopHoldMusic();
       stopTimer();
       localStorage.removeItem('eme_active_call');
@@ -696,8 +778,10 @@
       document.getElementById('staffIdleState').classList.remove('hidden');
       document.getElementById('staffInCallState').classList.add('hidden');
       document.getElementById('staffIncomingBanner').classList.add('hidden');
+      document.getElementById('staffHoldText').innerText = "Hold Call";
     }
 
+    // UTILITIES & VISUALIZER
     function startTimer(elementId) {
       stopTimer();
       callSeconds = 0;
@@ -719,7 +803,7 @@
       const canvas = document.getElementById(canvasId);
       if (!canvas) return;
       const canvasCtx = canvas.getContext('2d');
-      const ctx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = audioContext || new (window.AudioContext || window.webkitAudioContext)();
       const source = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 64;
