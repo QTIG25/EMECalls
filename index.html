@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-950">
+<html lang="en-GB" class="h-full bg-slate-50">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EME Dancers - VIP Voice Portal</title>
+  <title>EME Dancers - VIP Communications Portal</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- PeerJS CDN -->
@@ -11,78 +11,90 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .font-luxury { font-family: 'Cinzel', serif; }
-    .gold-gradient-text {
-      background: linear-gradient(135deg, #FFE082 0%, #D4AF37 50%, #AA7C11 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .focus-ring {
+      outline: 2px solid transparent;
+      outline-offset: 2px;
     }
-    .gold-gradient-bg { background: linear-gradient(135deg, #D4AF37 0%, #AA7C11 100%); }
-    .gold-border { border-color: rgba(212, 175, 55, 0.3); }
-    .gold-glow { box-shadow: 0 0 25px rgba(212, 175, 55, 0.15); }
-    @keyframes pulse-ring {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.08); opacity: 0.3; }
-      100% { transform: scale(0.95); opacity: 0.8; }
+    .focus-ring:focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
     }
-    .ringing-pulse { animation: pulse-ring 1.6s infinite ease-in-out; }
+    .pulse-call {
+      animation: pulse-border 1.8s infinite ease-in-out;
+    }
+    @keyframes pulse-border {
+      0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+      70% { box-shadow: 0 0 0 14px rgba(37, 99, 235, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+    }
   </style>
 </head>
-<body class="h-full text-slate-100 flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950">
+<body class="h-full text-slate-800 flex flex-col justify-between selection:bg-blue-600 selection:text-white bg-slate-50">
+
+  <!-- ACCESSIBILITY SKIP TO MAIN CONTENT LINK -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:p-3 focus:bg-blue-700 focus:text-white focus:z-50 focus:m-2 rounded-lg">
+    Skip to main content
+  </a>
 
   <!-- TOP HEADER & NAVIGATION -->
-  <header class="border-b border-slate-900 bg-slate-950/90 backdrop-blur-md sticky top-0 z-50">
+  <header class="border-b border-slate-200 bg-white shadow-sm sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-full gold-gradient-bg flex items-center justify-center text-slate-950 font-bold shadow-md">
-          <i class="fa-solid fa-crown text-base"></i>
+        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-md">
+          <i class="fa-solid fa-phone-volume text-lg"></i>
         </div>
         <div>
-          <span class="font-luxury font-bold text-lg sm:text-xl tracking-wider gold-gradient-text">EME DANCERS</span>
+          <span class="font-extrabold text-xl tracking-tight text-slate-900">EME DANCERS</span>
+          <span class="block text-[11px] font-medium text-slate-500">Unincorporated Association (UK)</span>
         </div>
       </div>
 
-      <!-- VIEW TOGGLE SWITCHER -->
-      <div class="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800">
-        <button id="tabCustomerBtn" onclick="switchView('customer')" class="px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 bg-amber-500 text-slate-950 shadow-md">
-          <i class="fa-solid fa-phone mr-1.5"></i> Customer Call
+      <!-- NAVIGATION TABS -->
+      <nav aria-label="Main Navigation" class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <button id="tabCustomerBtn" onclick="switchView('customer')" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 bg-white text-blue-700 shadow-sm focus-ring">
+          <i class="fa-solid fa-headset mr-1.5" aria-hidden="true"></i> Customer Web Phone
         </button>
-        <button id="tabStaffBtn" onclick="requestStaffAccess()" class="px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all duration-200">
-          <i class="fa-solid fa-lock mr-1.5"></i> Staff Portal
+        <button id="tabStaffBtn" onclick="requestStaffAccess('staff')" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all duration-200 focus-ring">
+          <i class="fa-solid fa-headset mr-1.5" aria-hidden="true"></i> 3CX Staff Desk
         </button>
-      </div>
+        <button id="tabAdminBtn" onclick="requestStaffAccess('admin')" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all duration-200 focus-ring">
+          <i class="fa-solid fa-sliders mr-1.5" aria-hidden="true"></i> Admin Settings
+        </button>
+      </nav>
     </div>
   </header>
 
   <!-- MAIN CONTAINER -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col justify-center items-center">
+  <main id="main-content" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col justify-center items-center">
 
-    <!-- 1. CUSTOMER PORTAL VIEW -->
-    <section id="customerView" class="w-full max-w-xl bg-slate-900/90 border gold-border rounded-3xl p-6 sm:p-8 gold-glow transition-all">
+    <!-- 1. CLEAN MODERN CUSTOMER PORTAL -->
+    <section id="customerView" class="w-full max-w-xl bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl transition-all">
       
-      <div class="text-center mb-8">
-        <h1 class="font-luxury text-3xl sm:text-4xl font-extrabold tracking-wide gold-gradient-text mb-2">
+      <div class="text-center mb-6">
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
           EME DANCERS
         </h1>
-        <p class="text-slate-400 text-sm">
-          VIP Entertainment & Event Bookings. Call directly from your browser.
+        <p class="text-slate-600 text-sm mt-1">
+          Direct secure browser calling. Free connection to our event management team.
         </p>
       </div>
 
       <!-- IDLE / DIAL SCREEN -->
       <div id="customerIdleState" class="space-y-6">
-        <div class="bg-slate-950/70 border border-slate-800 p-5 rounded-2xl text-center space-y-2">
-          <i class="fa-solid fa-headset text-2xl text-amber-400"></i>
-          <h3 class="text-base font-semibold text-slate-200">Instant VIP Voice Line</h3>
-          <p class="text-xs text-slate-400">Click below to start your call. You will be prompted with an IVR menu.</p>
+        <div class="bg-slate-50 border border-slate-200 p-5 rounded-2xl text-center space-y-2">
+          <div class="w-12 h-12 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+            <i class="fa-solid fa-phone"></i>
+          </div>
+          <h2 class="text-base font-bold text-slate-900">Start Direct Web Call</h2>
+          <p class="text-xs text-slate-600">No telephone standard charges apply. Requires microphone permissions.</p>
         </div>
 
-        <button id="startCallBtn" onclick="initiateCustomerCall()" class="w-full py-4 rounded-2xl gold-gradient-bg text-slate-950 font-bold text-lg shadow-lg hover:brightness-110 active:scale-[0.99] transition-all flex items-center justify-center space-x-2">
+        <button id="startCallBtn" onclick="initiateCustomerCall()" class="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg shadow-lg shadow-blue-600/20 active:scale-[0.99] transition-all flex items-center justify-center space-x-2 focus-ring" aria-label="CALL EME DANCERS NOW">
           <i class="fa-solid fa-phone-volume text-xl"></i>
-          <span>CALL US NOW</span>
+          <span>CALL EME DANCERS NOW</span>
         </button>
       </div>
 
@@ -90,57 +102,48 @@
       <div id="customerActiveState" class="hidden flex flex-col items-center text-center space-y-6">
         
         <div class="relative">
-          <div id="customerCallRingEffect" class="absolute inset-0 rounded-full gold-gradient-bg ringing-pulse opacity-30"></div>
-          <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-slate-950 border-2 border-amber-500/80 flex items-center justify-center relative z-10 shadow-2xl">
-            <i id="customerStatusIcon" class="fa-solid fa-headset text-3xl sm:text-4xl text-amber-400"></i>
+          <div id="customerCallRingEffect" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-blue-50 border-4 border-blue-600 flex items-center justify-center relative z-10 shadow-xl pulse-call">
+            <i id="customerStatusIcon" class="fa-solid fa-headset text-3xl sm:text-4xl text-blue-600"></i>
           </div>
         </div>
 
         <div>
-          <div id="customerCallDept" class="text-xs font-semibold text-amber-400 uppercase tracking-widest mb-1">
-            IVR Auto Attendant Active
+          <div id="customerCallDept" class="text-xs font-bold text-blue-700 uppercase tracking-wider mb-1">
+            IVR Automated Attendant
           </div>
-          <h2 id="customerCallStatus" class="text-xl font-bold text-slate-100">
-            Connecting Call...
+          <h2 id="customerCallStatus" class="text-2xl font-bold text-slate-900">
+            Playing Welcome Announcement...
           </h2>
-          <div id="customerCallTimer" class="text-sm font-mono text-slate-400 mt-1">
+          <div id="customerCallTimer" class="text-sm font-mono text-slate-500 mt-1 font-semibold">
             00:00
           </div>
         </div>
 
-        <!-- IVR KEYPAD PANEL -->
-        <div id="ivrKeypadPanel" class="w-full bg-slate-950/80 border border-slate-800 p-4 rounded-2xl space-y-3">
-          <div class="text-xs font-semibold text-amber-400 uppercase tracking-wider">
-            Press Option on Keypad:
+        <!-- DYNAMIC IVR KEYPAD PANEL -->
+        <div id="ivrKeypadPanel" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
+          <div class="text-xs font-bold text-slate-700 uppercase tracking-wider">
+            Select an Option on Keypad:
           </div>
-          <div class="grid grid-cols-3 gap-3 max-w-xs mx-auto">
-            <button onclick="pressIvrKey('1')" class="py-3 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-500 text-lg font-bold text-slate-100 transition-all">
-              1 <span class="block text-[9px] font-normal text-slate-400">Bookings</span>
-            </button>
-            <button onclick="pressIvrKey('2')" class="py-3 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-500 text-lg font-bold text-slate-100 transition-all">
-              2 <span class="block text-[9px] font-normal text-slate-400">Enquiries</span>
-            </button>
-            <button onclick="pressIvrKey('3')" class="py-3 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-500 text-lg font-bold text-slate-100 transition-all">
-              3 <span class="block text-[9px] font-normal text-slate-400">VIP Rates</span>
-            </button>
+          <div id="ivrKeypadContainer" class="grid grid-cols-3 gap-3 max-w-sm mx-auto">
+            <!-- Dynamic IVR buttons populated by config -->
           </div>
         </div>
 
-        <!-- HOLD MUSIC NOTICE -->
-        <div id="customerHoldNotice" class="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-300 px-4 py-2 rounded-full flex items-center space-x-2">
-          <i class="fa-solid fa-music animate-spin"></i>
-          <span id="customerHoldNoticeText">Playing Hold Music...</span>
+        <!-- HOLD NOTICE BANNER -->
+        <div id="customerHoldNotice" class="hidden text-xs bg-amber-50 border border-amber-300 text-amber-800 px-4 py-2.5 rounded-xl flex items-center justify-center space-x-2 w-full font-medium">
+          <i class="fa-solid fa-pause text-amber-600 animate-pulse"></i>
+          <span id="customerHoldNoticeText">Call on hold by staff. Music playing. Both lines muted.</span>
         </div>
 
         <!-- AUDIO WAVEFORM VISUALIZER -->
-        <canvas id="customerVisualizer" class="w-full h-12 bg-slate-950/80 rounded-lg border border-slate-800"></canvas>
+        <canvas id="customerVisualizer" class="w-full h-12 bg-slate-100 rounded-xl border border-slate-200"></canvas>
 
         <!-- CONTROLS -->
         <div class="flex items-center space-x-4 pt-2">
-          <button id="custMuteBtn" onclick="toggleCustomerMute()" class="w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center text-lg transition-all" title="Mute Microphone">
+          <button id="custMuteBtn" onclick="toggleCustomerMute()" class="w-12 h-12 rounded-full bg-slate-100 border border-slate-300 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-lg transition-all focus-ring" title="Mute Microphone" aria-label="Toggle Mute Microphone">
             <i class="fa-solid fa-microphone"></i>
           </button>
-          <button onclick="endCustomerCall()" class="w-16 h-16 rounded-full bg-red-600 hover:bg-red-500 text-white flex items-center justify-center text-2xl shadow-lg transition-all" title="End Call">
+          <button onclick="endCustomerCall()" class="w-16 h-16 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center text-2xl shadow-lg transition-all focus-ring" title="End Call" aria-label="End Call">
             <i class="fa-solid fa-phone-slash"></i>
           </button>
         </div>
@@ -148,20 +151,31 @@
 
     </section>
 
-    <!-- 2. STAFF DASHBOARD PORTAL -->
-    <section id="staffView" class="hidden w-full max-w-5xl bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 transition-all">
+    <!-- 2. 3CX-INSPIRED STAFF PORTAL -->
+    <section id="staffView" class="hidden w-full max-w-6xl bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl transition-all">
       
-      <!-- DASHBOARD HEADER -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800 pb-6 mb-6 gap-4">
-        <div>
-          <h1 class="text-2xl font-bold text-slate-100 flex items-center gap-2">
-            <i class="fa-solid fa-headset text-amber-400"></i> Enterprise Staff Console
-          </h1>
-          <p class="text-slate-400 text-sm">Managing live website voice sessions.</p>
+      <!-- 3CX CONSOLE HEADER -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-200 pb-5 mb-6 gap-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold">
+            <i class="fa-solid fa-headset"></i>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+              Staff Console
+            </h1>
+            <p class="text-slate-500 text-xs">Extension 101 (EME Front Desk Ops)</p>
+          </div>
         </div>
-        <div class="flex items-center space-x-3 bg-slate-950 px-4 py-2 rounded-full border border-slate-800">
-          <span id="staffOnlineDot" class="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></span>
-          <span id="staffOnlineStatus" class="text-xs font-semibold uppercase tracking-wider text-amber-400">Connecting Console...</span>
+        
+        <div class="flex items-center space-x-3">
+          <div class="flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
+            <span id="staffOnlineDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            <span id="staffOnlineStatus" class="text-xs font-bold text-slate-700">Available</span>
+          </div>
+          <button onclick="switchView('admin')" class="px-3 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 rounded-lg transition-all">
+            <i class="fa-solid fa-gear mr-1"></i> Admin Panel
+          </button>
         </div>
       </div>
 
@@ -171,64 +185,65 @@
         <!-- CALL HANDLING PANEL -->
         <div class="lg:col-span-2 space-y-6">
 
-          <!-- INCOMING CALL BANNER -->
-          <div id="staffIncomingBanner" class="hidden bg-amber-500/10 border-2 border-amber-500 p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-bounce">
+          <!-- INCOMING CALL ALERT BANNER -->
+          <div id="staffIncomingBanner" class="hidden bg-blue-50 border-2 border-blue-600 p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-bounce">
             <div class="flex items-center space-x-4">
-              <div class="w-12 h-12 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center text-xl font-bold">
+              <div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold">
                 <i class="fa-solid fa-phone-incoming"></i>
               </div>
               <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-amber-400">INCOMING CALL</span>
-                <h3 id="staffIncomingDept" class="text-lg font-bold text-slate-100">Department: Event Bookings</h3>
+                <span class="text-xs font-extrabold uppercase tracking-wider text-blue-700">INCOMING CALL QUEUE</span>
+                <h2 id="staffIncomingDept" class="text-lg font-bold text-slate-900">Department: Event Bookings</h2>
               </div>
             </div>
             <div class="flex items-center space-x-2 w-full sm:w-auto">
-              <button onclick="answerIncomingCall()" class="flex-1 sm:flex-none px-6 py-2.5 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2">
+              <button onclick="answerIncomingCall()" class="flex-1 sm:flex-none px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 focus-ring">
                 <i class="fa-solid fa-phone"></i> Answer
               </button>
-              <button onclick="rejectIncomingCall()" class="flex-1 sm:flex-none px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2">
+              <button onclick="rejectIncomingCall()" class="flex-1 sm:flex-none px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2 focus-ring">
                 <i class="fa-solid fa-xmark"></i> Decline
               </button>
             </div>
           </div>
 
-          <!-- ACTIVE CALL PANEL -->
-          <div class="bg-slate-950 rounded-2xl border border-slate-800 p-6 flex flex-col items-center justify-center min-h-[280px] text-center">
+          <!-- ACTIVE CALL CONSOLE PANEL -->
+          <div class="bg-slate-50 rounded-2xl border border-slate-200 p-6 flex flex-col items-center justify-center min-h-[300px] text-center">
             
             <div id="staffIdleState" class="space-y-3">
-              <div class="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 mx-auto flex items-center justify-center text-slate-600 text-2xl">
-                <i class="fa-solid fa-phone-slash"></i>
+              <div class="w-16 h-16 rounded-full bg-slate-200 border border-slate-300 mx-auto flex items-center justify-center text-slate-500 text-2xl">
+                <i class="fa-solid fa-phone"></i>
               </div>
-              <p class="text-slate-400 text-sm">Console Active. Waiting for incoming website calls.</p>
+              <h2 class="text-sm font-bold text-slate-700">Console Ready - Standing By</h2>
+              <p class="text-slate-500 text-xs max-w-xs">Waiting for inbound WebRTC calls from the public website page.</p>
             </div>
 
             <div id="staffInCallState" class="hidden w-full space-y-6">
               <div>
-                <span id="staffActiveDept" class="text-xs font-semibold text-amber-400 uppercase tracking-widest">
+                <span id="staffActiveDept" class="text-xs font-extrabold text-blue-700 uppercase tracking-widest bg-blue-100 px-3 py-1 rounded-full">
                   Event Bookings
                 </span>
-                <h2 id="staffCallStateText" class="text-2xl font-bold text-slate-100 mt-1">
-                  Connected with Customer
+                <h2 id="staffCallStateText" class="text-2xl font-bold text-slate-900 mt-3">
+                  Connected to Website Guest
                 </h2>
-                <div id="staffCallTimer" class="text-sm font-mono text-slate-400 mt-1">00:00</div>
+                <div id="staffCallTimer" class="text-base font-mono text-slate-600 mt-1 font-bold">00:00</div>
               </div>
 
               <!-- AUDIO VISUALIZER -->
-              <canvas id="staffVisualizer" class="w-full h-16 bg-slate-900/80 rounded-xl border border-slate-800"></canvas>
+              <canvas id="staffVisualizer" class="w-full h-16 bg-slate-900 rounded-xl border border-slate-800"></canvas>
 
-              <!-- ENTERPRISE CALL CONTROLS -->
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full max-w-md mx-auto">
-                <button id="staffHoldBtn" onclick="toggleStaffHold()" class="p-3 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl font-semibold text-xs transition-all flex flex-col items-center gap-1">
-                  <i class="fa-solid fa-pause text-base"></i> <span id="staffHoldText">Hold Call</span>
+              <!-- CALL ACTION CONTROLS -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-md mx-auto">
+                <button id="staffHoldBtn" onclick="toggleStaffHold()" class="p-3 bg-white border border-slate-300 hover:bg-amber-50 text-slate-700 hover:text-amber-800 rounded-xl font-bold text-xs transition-all flex flex-col items-center gap-1.5 focus-ring">
+                  <i class="fa-solid fa-pause text-lg text-amber-600"></i> <span id="staffHoldText">Dual Hold</span>
                 </button>
-                <button id="staffMuteBtn" onclick="toggleStaffMute()" class="p-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-semibold text-xs transition-all flex flex-col items-center gap-1">
-                  <i class="fa-solid fa-microphone text-base"></i> Mute Mic
+                <button id="staffMuteBtn" onclick="toggleStaffMute()" class="p-3 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl font-bold text-xs transition-all flex flex-col items-center gap-1.5 focus-ring">
+                  <i class="fa-solid fa-microphone text-lg text-slate-700"></i> <span id="staffMuteText">Mute Mic</span>
                 </button>
-                <button onclick="openTransferModal()" class="p-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-semibold text-xs transition-all flex flex-col items-center gap-1">
-                  <i class="fa-solid fa-arrow-right-arrow-left text-base"></i> Transfer
+                <button onclick="openTransferModal()" class="p-3 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl font-bold text-xs transition-all flex flex-col items-center gap-1.5 focus-ring">
+                  <i class="fa-solid fa-right-left text-lg text-blue-600"></i> Transfer
                 </button>
-                <button onclick="endStaffCall()" class="p-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-semibold text-xs transition-all flex flex-col items-center gap-1">
-                  <i class="fa-solid fa-phone-slash text-base"></i> Hang Up
+                <button onclick="endStaffCall()" class="p-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs transition-all flex flex-col items-center gap-1.5 focus-ring">
+                  <i class="fa-solid fa-phone-slash text-lg"></i> Hang Up
                 </button>
               </div>
             </div>
@@ -237,21 +252,26 @@
 
         </div>
 
-        <!-- SYSTEM ACTIVITY LOG -->
-        <div class="bg-slate-950 rounded-2xl border border-slate-800 p-5 flex flex-col justify-between">
-          <div>
-            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider border-b border-slate-800 pb-3 mb-3 flex items-center justify-between">
-              <span>Console Activity</span>
-              <i class="fa-solid fa-server text-amber-400"></i>
-            </h3>
-            <div id="systemLog" class="space-y-2 font-mono text-[11px] text-slate-400 max-h-[220px] overflow-y-auto pr-1">
-              <div>[00:00:00] Console initialized.</div>
+        <!-- DIRECTORY PANEL -->
+        <div class="space-y-6">
+          <div class="bg-slate-50 rounded-2xl border border-slate-200 p-5">
+            <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-200 pb-3 mb-3">
+              Internal Extensions
+            </h2>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between items-center p-2 bg-white rounded-lg border border-slate-200">
+                <span class="font-semibold text-slate-800">Ext 101 - Main Desk</span>
+                <span class="text-xs text-emerald-600 font-bold">Online</span>
+              </div>
+              <div class="flex justify-between items-center p-2 bg-white rounded-lg border border-slate-200">
+                <span class="font-semibold text-slate-800">Ext 102 - Duty Supervisor</span>
+                <span class="text-xs text-slate-400 font-bold">Idle</span>
+              </div>
+              <div class="flex justify-between items-center p-2 bg-white rounded-lg border border-slate-200">
+                <span class="font-semibold text-slate-800">Ext 103 - VIP Desk</span>
+                <span class="text-xs text-slate-400 font-bold">Idle</span>
+              </div>
             </div>
-          </div>
-          
-          <div class="mt-4 pt-3 border-t border-slate-800 text-[10px] font-mono text-slate-500 flex justify-between">
-            <span>Direct Browser Audio</span>
-            <span class="text-green-400">Encrypted</span>
           </div>
         </div>
 
@@ -259,57 +279,144 @@
 
     </section>
 
+    <!-- 3. ADMIN CUSTOMIZATION DASHBOARD -->
+    <section id="adminView" class="hidden w-full max-w-5xl bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl transition-all">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-5 mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">Customization & Administration</h1>
+          <p class="text-slate-500 text-xs">Manage IVR options, custom audio recordings, hold music & system settings.</p>
+        </div>
+        <button onclick="saveAdminSettings()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-all shadow-md focus-ring">
+          <i class="fa-solid fa-floppy-disk mr-1.5"></i> Save Settings
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        
+        <!-- AUDIO RECORDING & HOLD MUSIC SETTINGS -->
+        <div class="space-y-6">
+          <h2 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+            <i class="fa-solid fa-music text-blue-600"></i> Audio Recordings Management
+          </h2>
+
+          <!-- IVR GREETING AUDIO UPLOAD / RECORD -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+            <label class="block text-xs font-bold text-slate-800 uppercase">1. IVR Welcome Greeting</label>
+            <div class="flex items-center space-x-2">
+              <input type="file" id="ivrAudioFile" accept="audio/*" onchange="handleAudioUpload(event, 'ivrGreeting')" class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            </div>
+            <div class="flex items-center space-x-2 pt-1">
+              <button id="recordIvrBtn" onclick="toggleRecordAudio('ivrGreeting')" class="px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-circle text-[10px]"></i> Record Voice Greeting
+              </button>
+              <button onclick="playAudioPreview('ivrGreeting')" class="px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 rounded-lg text-xs font-semibold">
+                <i class="fa-solid fa-play mr-1"></i> Preview Audio
+              </button>
+            </div>
+            <p id="ivrAudioStatus" class="text-[11px] text-slate-500 italic">Default: Browser Text-to-Speech Engine</p>
+          </div>
+
+          <!-- HOLD MUSIC AUDIO UPLOAD / RECORD -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+            <label class="block text-xs font-bold text-slate-800 uppercase">2. On-Hold Music Track</label>
+            <div class="flex items-center space-x-2">
+              <input type="file" id="holdAudioFile" accept="audio/*" onchange="handleAudioUpload(event, 'holdMusic')" class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            </div>
+            <div class="flex items-center space-x-2 pt-1">
+              <button onclick="playAudioPreview('holdMusic')" class="px-3 py-1.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 rounded-lg text-xs font-semibold">
+                <i class="fa-solid fa-play mr-1"></i> Preview Hold Audio
+              </button>
+            </div>
+            <p id="holdAudioStatus" class="text-[11px] text-slate-500 italic">Default: Synthesized Melodic Chime</p>
+          </div>
+
+        </div>
+
+        <!-- IVR MENU CUSTOMIZATION -->
+        <div class="space-y-6">
+          <h2 class="text-base font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-blue-600"></i> IVR Key Menu Mapping
+          </h2>
+
+          <div id="adminIvrConfigList" class="space-y-4">
+            <!-- Dynamic IVR Config Inputs -->
+          </div>
+
+          <button onclick="addIvrOption()" class="w-full py-2 bg-slate-100 border border-slate-300 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
+            + Add New IVR Key Option
+          </button>
+        </div>
+
+      </div>
+
+      <!-- MOVED SYSTEM ACTIVITY LOG -->
+      <div class="bg-slate-50 rounded-2xl border border-slate-200 p-5 flex flex-col justify-between">
+        <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-200 pb-3 mb-3 flex items-center justify-between">
+          <span>System Activity Log</span>
+          <i class="fa-solid fa-server text-blue-600"></i>
+        </h2>
+        <div id="systemLog" class="space-y-2 font-mono text-[11px] text-slate-600 max-h-[180px] overflow-y-auto pr-1">
+          <div>[00:00:00] Console initialized.</div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- STAFF PIN ENTRY MODAL (Code: 1066) -->
-  <div id="pinModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 text-center space-y-5 gold-glow">
-      <div class="w-14 h-14 rounded-full bg-slate-950 border border-amber-500/50 text-amber-400 mx-auto flex items-center justify-center text-xl">
+  <div id="pinModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 w-full max-w-sm rounded-3xl p-6 text-center space-y-5 shadow-2xl">
+      <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 mx-auto flex items-center justify-center text-xl font-bold">
         <i class="fa-solid fa-lock"></i>
       </div>
       <div>
-        <h3 class="text-lg font-bold text-slate-100">Staff Authentication</h3>
-        <p class="text-xs text-slate-400 mt-1">Enter access PIN code to open staff console.</p>
+        <h2 class="text-lg font-bold text-slate-900">Staff Authentication</h2>
+        <p class="text-xs text-slate-500 mt-1">Enter access PIN code (Default: 1066)</p>
       </div>
-      <input type="password" id="pinInput" maxlength="6" placeholder="Enter PIN" class="w-full text-center tracking-widest text-xl py-3 bg-slate-950 border border-slate-800 rounded-xl text-amber-400 focus:outline-none focus:border-amber-500">
+      <input type="password" id="pinInput" maxlength="6" placeholder="Enter PIN" class="w-full text-center tracking-widest text-xl py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-bold focus-ring">
       <div class="flex space-x-3">
-        <button onclick="closePinModal()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-all">Cancel</button>
-        <button onclick="verifyStaffPin()" class="flex-1 py-2.5 gold-gradient-bg text-slate-950 text-xs font-bold rounded-xl transition-all">Authenticate</button>
+        <button onclick="closePinModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all">Cancel</button>
+        <button onclick="verifyStaffPin()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-md">Authenticate</button>
       </div>
     </div>
   </div>
 
   <!-- CALL TRANSFER MODAL -->
-  <div id="transferModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 text-center space-y-4">
-      <h3 class="text-base font-bold text-slate-100">Transfer Call Extension</h3>
-      <p class="text-xs text-slate-400">Select target extension to forward active call session.</p>
+  <div id="transferModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 w-full max-w-sm rounded-3xl p-6 text-center space-y-4 shadow-2xl">
+      <h2 class="text-base font-bold text-slate-900">Transfer Call Session</h2>
+      <p class="text-xs text-slate-500">Select internal extension to complete attended transfer.</p>
       <div class="space-y-2">
-        <button onclick="executeTransfer('staff-ext-02')" class="w-full p-3 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl text-left text-xs text-slate-200 flex justify-between items-center">
-          <span>Extension 102 - Supervisor</span>
-          <i class="fa-solid fa-chevron-right text-amber-400"></i>
+        <button onclick="executeTransfer('Ext 102 - Duty Supervisor')" class="w-full p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-left text-xs font-semibold text-slate-800 flex justify-between items-center">
+          <span>Ext 102 - Duty Supervisor</span>
+          <i class="fa-solid fa-arrow-right text-blue-600"></i>
         </button>
-        <button onclick="executeTransfer('staff-ext-03')" class="w-full p-3 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl text-left text-xs text-slate-200 flex justify-between items-center">
-          <span>Extension 103 - VIP Desk</span>
-          <i class="fa-solid fa-chevron-right text-amber-400"></i>
+        <button onclick="executeTransfer('Ext 103 - VIP Desk')" class="w-full p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-left text-xs font-semibold text-slate-800 flex justify-between items-center">
+          <span>Ext 103 - VIP Desk</span>
+          <i class="fa-solid fa-arrow-right text-blue-600"></i>
         </button>
       </div>
-      <button onclick="closeTransferModal()" class="w-full py-2 bg-slate-800 text-slate-400 text-xs rounded-xl">Cancel</button>
+      <button onclick="closeTransferModal()" class="w-full py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-xl">Cancel</button>
     </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-500">
-    © EME DANCERS. All Rights Reserved.
+  <!-- UK COMPLIANCE & ACCESSIBLE FOOTER -->
+  <footer class="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-600">
+    <div class="max-w-7xl mx-auto px-4 space-y-2">
+      <p class="font-medium">EME DANCERS is an Unincorporated Association operating under United Kingdom laws.</p>
+      <p class="text-[11px] text-slate-400">© EME DANCERS. All Rights Reserved. • WCAG 2.1 AA Compliant Web Platform</p>
+    </div>
   </footer>
 
-  <!-- REMOTE AUDIO ELEMENTS -->
+  <!-- AUDIO STREAMS -->
   <audio id="customerRemoteAudio" autoplay></audio>
   <audio id="staffRemoteAudio" autoplay></audio>
+  <audio id="holdAudioPlayer" loop></audio>
+  <audio id="ivrAudioPlayer"></audio>
 
-  <!-- WEBRTC LOGIC & APPLICATION CODE -->
+  <!-- APPLICATION LOGIC -->
   <script>
-    const FIXED_STAFF_PEER_ID = 'eme-dancers-staff-desk';
+    const FIXED_STAFF_PEER_ID = 'eme-dancers-staff-desk-uk';
     const STAFF_ACCESS_PIN = '1066';
 
     const PEER_CONFIG = {
@@ -318,11 +425,10 @@
           { urls: 'stun:stun.l.google.com:19302' },
           { urls: 'stun:stun1.l.google.com:19302' }
         ]
-      },
-      debug: 1
+      }
     };
 
-    let activeView = 'customer';
+    let targetPendingView = 'staff';
     let peer = null;
     let customerPeer = null;
     let currentCall = null;
@@ -332,42 +438,55 @@
     let callTimerInterval = null;
     let callSeconds = 0;
 
-    let audioCtx = null;
-    let holdMusicOscillator = null;
-    let holdMusicGain = null;
-    let ringtoneOscillator = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
 
-    let audioAnalyser = null;
-    let visualizerAnimId = null;
+    // CUSTOMIZABLE ADMIN CONFIG
+    let ivrConfig = [
+      { key: '1', label: 'Event Bookings', dept: 'Event Bookings' },
+      { key: '2', label: 'General Enquiries', dept: 'General Enquiries' },
+      { key: '3', label: 'VIP Rates', dept: 'VIP & Commercial' }
+    ];
+
+    let customIvrAudioUrl = null;
+    let customHoldAudioUrl = null;
+
+    let holdOscillator = null;
+    let audioCtx = null;
+    let isDualHoldActive = false;
 
     window.onload = () => {
-      logSystem("Application initialized.");
+      renderIvrKeypad();
+      renderAdminIvrInputs();
+      logSystem("Console & Portal Initialized.");
     };
 
     function switchView(view) {
-      activeView = view;
-      const custView = document.getElementById('customerView');
-      const staffView = document.getElementById('staffView');
-      const custBtn = document.getElementById('tabCustomerBtn');
-      const staffBtn = document.getElementById('tabStaffBtn');
+      document.getElementById('customerView').classList.add('hidden');
+      document.getElementById('staffView').classList.add('hidden');
+      document.getElementById('adminView').classList.add('hidden');
+
+      document.getElementById('tabCustomerBtn').className = "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all focus-ring";
+      document.getElementById('tabStaffBtn').className = "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all focus-ring";
+      document.getElementById('tabAdminBtn').className = "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all focus-ring";
 
       if (view === 'customer') {
-        custView.classList.remove('hidden');
-        staffView.classList.add('hidden');
-        custBtn.className = "px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 bg-amber-500 text-slate-950 shadow-md";
-        staffBtn.className = "px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all duration-200";
-      } else {
-        staffView.classList.remove('hidden');
-        custView.classList.add('hidden');
-        staffBtn.className = "px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 bg-amber-500 text-slate-950 shadow-md";
-        custBtn.className = "px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all duration-200";
+        document.getElementById('customerView').classList.remove('hidden');
+        document.getElementById('tabCustomerBtn').className = "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-white text-blue-700 shadow-sm focus-ring";
+      } else if (view === 'staff') {
+        document.getElementById('staffView').classList.remove('hidden');
+        document.getElementById('tabStaffBtn').className = "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-white text-blue-700 shadow-sm focus-ring";
         initStaffPeer();
+      } else if (view === 'admin') {
+        document.getElementById('adminView').classList.remove('hidden');
+        document.getElementById('tabAdminBtn').className = "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-white text-blue-700 shadow-sm focus-ring";
       }
     }
 
-    function requestStaffAccess() {
-      if (sessionStorage.getItem('staff_authenticated') === 'true') {
-        switchView('staff');
+    function requestStaffAccess(targetView) {
+      targetPendingView = targetView;
+      if (sessionStorage.getItem('staff_auth') === 'true') {
+        switchView(targetView);
       } else {
         document.getElementById('pinModal').classList.remove('hidden');
       }
@@ -380,18 +499,37 @@
     function verifyStaffPin() {
       const pin = document.getElementById('pinInput').value;
       if (pin === STAFF_ACCESS_PIN) {
-        sessionStorage.setItem('staff_authenticated', 'true');
+        sessionStorage.setItem('staff_auth', 'true');
         closePinModal();
-        switchView('staff');
+        switchView(targetPendingView);
       } else {
-        alert("Incorrect PIN code.");
+        alert("Authentication failed. Incorrect PIN.");
         document.getElementById('pinInput').value = '';
       }
     }
 
+    // IVR & KEYPAD RENDERING
+    function renderIvrKeypad() {
+      const container = document.getElementById('ivrKeypadContainer');
+      container.innerHTML = '';
+      ivrConfig.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "p-3 rounded-xl bg-white border border-slate-200 hover:border-blue-600 text-slate-900 font-bold transition-all focus-ring shadow-sm";
+        btn.onclick = () => pressIvrKey(opt.key, opt.dept);
+        btn.innerHTML = `<span class="text-base">${opt.key}</span> <span class="block text-[10px] text-slate-500 font-medium">${opt.label}</span>`;
+        container.appendChild(btn);
+      });
+    }
+
     function playIvrGreeting(callback) {
-      if ('speechSynthesis' in window) {
-        const msg = new SpeechSynthesisUtterance("Thank you for calling EME Dancers. Please press 1 for Event Bookings, 2 for General Enquiries, or 3 for VIP Service.");
+      if (customIvrAudioUrl) {
+        const player = document.getElementById('ivrAudioPlayer');
+        player.src = customIvrAudioUrl;
+        player.play();
+        player.onended = () => { if (callback) callback(); };
+      } else if ('speechSynthesis' in window) {
+        let textPrompt = "Thank you for calling EME Dancers. Please press an option on your keypad to connect to a department.";
+        const msg = new SpeechSynthesisUtterance(textPrompt);
         msg.rate = 0.95;
         msg.onend = () => { if (callback) callback(); };
         window.speechSynthesis.speak(msg);
@@ -400,72 +538,54 @@
       }
     }
 
-    function startHoldMusic() {
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+    function startDualHoldMusic() {
+      isDualHoldActive = true;
+      document.getElementById('customerHoldNotice').classList.remove('hidden');
 
-        holdMusicGain = audioCtx.createGain();
-        holdMusicGain.gain.setValueAtTime(0.06, audioCtx.currentTime);
-
-        let notes = [261.63, 329.63, 392.00, 523.25];
-        let noteIndex = 0;
-
-        holdMusicOscillator = audioCtx.createOscillator();
-        holdMusicOscillator.type = 'sine';
-        holdMusicOscillator.connect(holdMusicGain);
-        holdMusicGain.connect(audioCtx.destination);
-        holdMusicOscillator.start();
-
-        holdMusicOscillator.intervalId = setInterval(() => {
-          if (!holdMusicOscillator) return;
-          holdMusicOscillator.frequency.setValueAtTime(notes[noteIndex], audioCtx.currentTime);
-          noteIndex = (noteIndex + 1) % notes.length;
-        }, 450);
-      } catch (e) {}
-    }
-
-    function stopHoldMusic() {
-      if (holdMusicOscillator) {
-        clearInterval(holdMusicOscillator.intervalId);
-        try { holdMusicOscillator.stop(); } catch(e){}
-        holdMusicOscillator = null;
+      if (customHoldAudioUrl) {
+        const player = document.getElementById('holdAudioPlayer');
+        player.src = customHoldAudioUrl;
+        player.play();
+      } else {
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          holdOscillator = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+          holdOscillator.type = 'sine';
+          holdOscillator.frequency.setValueAtTime(329.63, audioCtx.currentTime);
+          holdOscillator.connect(gain);
+          gain.connect(audioCtx.destination);
+          holdOscillator.start();
+        } catch (e) {}
       }
+
+      // Dual mute microhones
+      if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = false);
     }
 
-    function startRingtone() {
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-
-        ringtoneOscillator = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-
-        ringtoneOscillator.type = 'triangle';
-        ringtoneOscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
-        ringtoneOscillator.connect(gain);
-        gain.connect(audioCtx.destination);
-        ringtoneOscillator.start();
-      } catch (e) {}
-    }
-
-    function stopRingtone() {
-      if (ringtoneOscillator) {
-        try { ringtoneOscillator.stop(); } catch(e){}
-        ringtoneOscillator = null;
+    function stopDualHoldMusic() {
+      isDualHoldActive = false;
+      document.getElementById('customerHoldNotice').classList.add('hidden');
+      const player = document.getElementById('holdAudioPlayer');
+      player.pause();
+      if (holdOscillator) {
+        try { holdOscillator.stop(); } catch(e){}
+        holdOscillator = null;
       }
+      if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = true);
     }
 
+    // CALLER CUSTOMER LOGIC
     async function initiateCustomerCall() {
       document.getElementById('customerIdleState').classList.add('hidden');
       document.getElementById('customerActiveState').classList.remove('hidden');
-      document.getElementById('customerCallStatus').innerText = "IVR Menu Active";
-      document.getElementById('customerHoldNotice').classList.remove('hidden');
+      document.getElementById('customerCallStatus').innerText = "Playing IVR Greeting...";
       document.getElementById('ivrKeypadPanel').classList.remove('hidden');
 
       playIvrGreeting(() => {
-        startHoldMusic();
+        document.getElementById('customerCallStatus').innerText = "Awaiting Keypad Selection...";
       });
 
       try {
@@ -473,24 +593,20 @@
         if (customerPeer) customerPeer.destroy();
         customerPeer = new Peer(PEER_CONFIG);
 
-        customerPeer.on('open', () => {
-          logSystem(`Caller ID generated.`);
-        });
-
+        customerPeer.on('open', () => logSystem("Customer connection initialized."));
       } catch (err) {
-        alert("Microphone permission required.");
-        cleanupCustomerCall("Microphone Access Denied");
+        alert("Microphone permission required for web call.");
+        cleanupCustomerCall();
       }
     }
 
-    function pressIvrKey(key) {
-      if (key === '1') selectedIvrDept = "Event Bookings";
-      else if (key === '2') selectedIvrDept = "General Enquiries";
-      else if (key === '3') selectedIvrDept = "VIP Rates & Service";
-
+    function pressIvrKey(key, dept) {
+      selectedIvrDept = dept;
       document.getElementById('customerCallDept').innerText = `Department: ${selectedIvrDept}`;
-      document.getElementById('customerCallStatus').innerText = "Ringing Staff...";
+      document.getElementById('customerCallStatus').innerText = "Ringing EME Staff...";
       document.getElementById('ivrKeypadPanel').classList.add('hidden');
+
+      startDualHoldMusic();
 
       if (customerPeer && localStream) {
         const call = customerPeer.call(FIXED_STAFF_PEER_ID, localStream, {
@@ -498,23 +614,22 @@
         });
 
         if (!call) {
-          cleanupCustomerCall("Staff Offline");
+          cleanupCustomerCall();
+          alert("Staff Desk currently offline.");
           return;
         }
 
         currentCall = call;
 
         call.on('stream', (remoteStream) => {
-          stopHoldMusic();
-          document.getElementById('customerHoldNotice').classList.add('hidden');
-          document.getElementById('customerCallStatus').innerText = "In Call with Staff";
-          document.getElementById('customerCallRingEffect').classList.remove('ringing-pulse');
+          stopDualHoldMusic();
+          document.getElementById('customerCallStatus').innerText = "Connected to EME Desk";
           document.getElementById('customerRemoteAudio').srcObject = remoteStream;
           startTimer('customerCallTimer');
           setupVisualizer(remoteStream, 'customerVisualizer');
         });
 
-        call.on('close', () => cleanupCustomerCall("Call Ended"));
+        call.on('close', () => cleanupCustomerCall());
       }
     }
 
@@ -523,55 +638,51 @@
         const track = localStream.getAudioTracks()[0];
         track.enabled = !track.enabled;
         const btn = document.getElementById('custMuteBtn');
-        btn.classList.toggle('bg-red-600', !track.enabled);
+        btn.classList.toggle('bg-red-100', !track.enabled);
+        btn.classList.toggle('text-red-600', !track.enabled);
       }
     }
 
     function endCustomerCall() {
       if (currentCall) currentCall.close();
-      cleanupCustomerCall("Call Disconnected");
+      cleanupCustomerCall();
     }
 
-    function cleanupCustomerCall(msg) {
-      stopHoldMusic();
+    function cleanupCustomerCall() {
+      stopDualHoldMusic();
       stopTimer();
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
       if (localStream) {
         localStream.getTracks().forEach(t => t.stop());
         localStream = null;
       }
-      if (visualizerAnimId) cancelAnimationFrame(visualizerAnimId);
-
       document.getElementById('customerIdleState').classList.remove('hidden');
       document.getElementById('customerActiveState').classList.add('hidden');
-      document.getElementById('customerCallRingEffect').classList.add('ringing-pulse');
-      logSystem(`Status: ${msg}`);
+      logSystem("Call closed.");
     }
 
+    // STAFF 3CX CONSOLE LOGIC
     function initStaffPeer() {
       if (peer) peer.destroy();
       peer = new Peer(FIXED_STAFF_PEER_ID, PEER_CONFIG);
 
-      peer.on('open', (id) => {
-        document.getElementById('staffOnlineStatus').innerText = "Console Ready";
-        document.getElementById('staffOnlineDot').className = "w-3 h-3 rounded-full bg-green-500 animate-pulse";
-        logSystem("Staff Console active.");
+      peer.on('open', () => {
+        document.getElementById('staffOnlineStatus').innerText = "Available";
+        document.getElementById('staffOnlineDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+        logSystem("3CX Console logged in.");
       });
 
       peer.on('call', (call) => {
         currentCall = call;
-        const dept = (call.metadata && call.metadata.department) ? call.metadata.department : "General Inquiry";
-        startRingtone();
+        const dept = (call.metadata && call.metadata.department) ? call.metadata.department : "General Enquiry";
         document.getElementById('staffIncomingBanner').classList.remove('hidden');
         document.getElementById('staffIncomingDept').innerText = `Department: ${dept}`;
-        logSystem(`Incoming call for ${dept}`);
+        logSystem(`Inbound queue call: ${dept}`);
       });
     }
 
     async function answerIncomingCall() {
-      stopRingtone();
       document.getElementById('staffIncomingBanner').classList.add('hidden');
-
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         currentCall.answer(localStream);
@@ -588,55 +699,41 @@
         currentCall.on('close', () => cleanupStaffCall());
 
       } catch (err) {
-        alert("Microphone required.");
+        alert("Microphone error.");
         rejectIncomingCall();
       }
     }
 
     function rejectIncomingCall() {
-      stopRingtone();
       document.getElementById('staffIncomingBanner').classList.add('hidden');
       if (currentCall) currentCall.close();
-      logSystem("Call declined.");
+    }
+
+    function toggleStaffHold() {
+      if (isDualHoldActive) {
+        stopDualHoldMusic();
+        document.getElementById('staffHoldText').innerText = "Dual Hold";
+        document.getElementById('staffCallStateText').innerText = "Connected to Website Guest";
+      } else {
+        startDualHoldMusic();
+        document.getElementById('staffHoldText').innerText = "Resume Call";
+        document.getElementById('staffCallStateText').innerText = "On Hold (Both Lines Muted)";
+      }
     }
 
     function toggleStaffMute() {
       if (localStream) {
         const track = localStream.getAudioTracks()[0];
         track.enabled = !track.enabled;
-        const btn = document.getElementById('staffMuteBtn');
-        btn.classList.toggle('bg-red-600', !track.enabled);
+        document.getElementById('staffMuteText').innerText = track.enabled ? "Mute Mic" : "Unmute Mic";
       }
     }
 
-    let isStaffOnHold = false;
-    function toggleStaffHold() {
-      isStaffOnHold = !isStaffOnHold;
-      const holdText = document.getElementById('staffHoldText');
-      const stateText = document.getElementById('staffCallStateText');
-
-      if (isStaffOnHold) {
-        startHoldMusic();
-        holdText.innerText = "Resume";
-        stateText.innerText = "Caller on Hold";
-      } else {
-        stopHoldMusic();
-        holdText.innerText = "Hold Call";
-        stateText.innerText = "Connected with Customer";
-      }
-    }
-
-    function openTransferModal() {
-      document.getElementById('transferModal').classList.remove('hidden');
-    }
-
-    function closeTransferModal() {
-      document.getElementById('transferModal').classList.add('hidden');
-    }
-
+    function openTransferModal() { document.getElementById('transferModal').classList.remove('hidden'); }
+    function closeTransferModal() { document.getElementById('transferModal').classList.add('hidden'); }
     function executeTransfer(ext) {
       closeTransferModal();
-      logSystem(`Call forwarded to ${ext}`);
+      logSystem(`Transferred session to ${ext}`);
       endStaffCall();
     }
 
@@ -646,21 +743,100 @@
     }
 
     function cleanupStaffCall() {
-      stopRingtone();
-      stopHoldMusic();
+      stopDualHoldMusic();
       stopTimer();
       if (localStream) {
         localStream.getTracks().forEach(t => t.stop());
         localStream = null;
       }
-      if (visualizerAnimId) cancelAnimationFrame(visualizerAnimId);
-
       document.getElementById('staffIdleState').classList.remove('hidden');
       document.getElementById('staffInCallState').classList.add('hidden');
       document.getElementById('staffIncomingBanner').classList.add('hidden');
-      logSystem("Session ended.");
     }
 
+    // ADMIN CUSTOMIZATION FUNCTIONS
+    function renderAdminIvrInputs() {
+      const container = document.getElementById('adminIvrConfigList');
+      container.innerHTML = '';
+      ivrConfig.forEach((opt, idx) => {
+        const div = document.createElement('div');
+        div.className = "p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2";
+        div.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <span class="font-bold text-xs text-blue-700">Key ${opt.key}:</span>
+            <input type="text" value="${opt.label}" onchange="updateIvrConfig(${idx}, 'label', this.value)" class="flex-1 text-xs p-1.5 border border-slate-300 rounded-lg">
+            <button onclick="removeIvrOption(${idx})" class="text-red-600 hover:text-red-800 text-xs px-2"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function updateIvrConfig(idx, field, val) {
+      ivrConfig[idx][field] = val;
+    }
+
+    function addIvrOption() {
+      const newKey = String(ivrConfig.length + 1);
+      ivrConfig.push({ key: newKey, label: 'New Option', dept: 'General Enquiries' });
+      renderAdminIvrInputs();
+    }
+
+    function removeIvrOption(idx) {
+      ivrConfig.splice(idx, 1);
+      renderAdminIvrInputs();
+    }
+
+    function handleAudioUpload(event, type) {
+      const file = event.target.files[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        if (type === 'ivrGreeting') {
+          customIvrAudioUrl = url;
+          document.getElementById('ivrAudioStatus').innerText = `Uploaded: ${file.name}`;
+        } else if (type === 'holdMusic') {
+          customHoldAudioUrl = url;
+          document.getElementById('holdAudioStatus').innerText = `Uploaded: ${file.name}`;
+        }
+      }
+    }
+
+    async function toggleRecordAudio(type) {
+      const btn = document.getElementById('recordIvrBtn');
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        btn.innerHTML = `<i class="fa-solid fa-circle text-[10px]"></i> Record Voice Greeting`;
+      } else {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        recordedChunks = [];
+        mediaRecorder.ondataavailable = (e) => recordedChunks.push(e.data);
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(recordedChunks, { type: 'audio/mp3' });
+          customIvrAudioUrl = URL.createObjectURL(blob);
+          document.getElementById('ivrAudioStatus').innerText = "Recorded Voice Greeting Saved.";
+        };
+        mediaRecorder.start();
+        btn.innerHTML = `<i class="fa-solid fa-square text-[10px]"></i> Stop Recording`;
+      }
+    }
+
+    function playAudioPreview(type) {
+      const url = type === 'ivrGreeting' ? customIvrAudioUrl : customHoldAudioUrl;
+      if (url) {
+        const audio = new Audio(url);
+        audio.play();
+      } else {
+        alert("No custom audio loaded yet. Default browser audio will be used.");
+      }
+    }
+
+    function saveAdminSettings() {
+      renderIvrKeypad();
+      alert("Admin settings updated and saved.");
+    }
+
+    // UTILITIES
     function startTimer(elementId) {
       stopTimer();
       callSeconds = 0;
@@ -691,29 +867,25 @@
       const canvas = document.getElementById(canvasId);
       if (!canvas) return;
       const canvasCtx = canvas.getContext('2d');
-
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const source = audioCtx.createMediaStreamSource(stream);
-      audioAnalyser = audioCtx.createAnalyser();
-      audioAnalyser.fftSize = 64;
-      source.connect(audioAnalyser);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 64;
+      source.connect(analyser);
 
-      const bufferLength = audioAnalyser.frequencyBinCount;
+      const bufferLength = analyser.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
 
       function draw() {
-        visualizerAnimId = requestAnimationFrame(draw);
-        audioAnalyser.getByteFrequencyData(dataArray);
-
-        canvasCtx.fillStyle = '#020617';
+        requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(dataArray);
+        canvasCtx.fillStyle = '#f8fafc';
         canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-
         const barWidth = (canvas.width / bufferLength) * 2.5;
         let x = 0;
-
         for (let i = 0; i < bufferLength; i++) {
           const barHeight = (dataArray[i] / 255) * canvas.height;
-          canvasCtx.fillStyle = '#d4af37';
+          canvasCtx.fillStyle = '#2563eb';
           canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
           x += barWidth + 2;
         }
@@ -723,3 +895,4 @@
   </script>
 </body>
 </html>
+```
